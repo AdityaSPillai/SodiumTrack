@@ -42,10 +42,19 @@ body {
 
 .header {
   text-align: center;
+  display: flex;
+  flex-direction: row;
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 1px solid var(--border-color);
   animation: fadeIn 0.8s ease-out;
+  align-items: center;
+}
+
+.logo {
+  width: 150px;
+  height: 150px;
+  padding: 10px;
 }
 
 @keyframes fadeIn {

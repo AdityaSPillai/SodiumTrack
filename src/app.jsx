@@ -161,8 +161,13 @@ export default function Home() {
   return (
     <main className="container">
       <header className="header">
-        <h1>Colorimetric Sodium Detection</h1>
-        <p>Using Cuc-Curcumin Nanoparticle Test Strips</p>
+        <div className="logo">
+          <img src="../src/assets/logotransparent.png" alt="Logo" className="logo-image" />
+        </div>
+        <div className="title">
+          <h1 className="title-text">Colorimetric Sodium Detection</h1>
+          <p className="subtitle-text">Using Cuc-Curcumin Nanoparticle Test Strips</p>
+        </div>
       </header>
 
       <div className="tabs">
