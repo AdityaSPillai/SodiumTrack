@@ -13,11 +13,15 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
   const [isImageValid, setIsImageValid] = useState(true);
 
   const getPointerPosition = (level) => {
-    const minLevel = 30;
-    const maxLevel = 250;
-    const clampedLevel = Math.max(minLevel, Math.min(level, maxLevel));
-    const percentage = ((clampedLevel - minLevel) / (maxLevel - minLevel)) * 100;
-    return `${percentage}%`;
+    if(level >= 30 && level <= 135) {
+      return 66.5;
+    }
+    if(level > 135 && level <= 145) {
+      return 200;
+    }
+    if(level > 145) {
+      return 333;
+    }
   };
 
   useEffect(() => {
@@ -29,8 +33,8 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
         });
       } else if (sodiumLevel >= 135 && sodiumLevel <= 145) {
         setSodiumStatus({
-          class: "moderate-level",
-          label: "Moderate sodium concentration"
+          class: "normal-level",
+          label: "Normal sodium concentration"
         });
       } else {
         setSodiumStatus({
@@ -133,7 +137,7 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
                       <p>{sodiumStatus.label}</p>
                       <div className="range-indicator">
                       <div className="range safe">Low (30–135)</div>
-                      <div className="range moderate">Moderate (135–145)</div>
+                      <div className="range normal">Normal (135–145)</div>
                       <div className="range high">High (145+)</div>
                       <div className="pointer" style={{ left: getPointerPosition(sodiumLevel) }}></div>
                       </div>
