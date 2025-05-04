@@ -7,7 +7,7 @@ import ResultsDisplay from "./components/results-display"
 import SodiumGraph from "./components/sodium-graph"
 import { FaCamera } from "react-icons/fa"
 import { MdOutlineFileUpload } from "react-icons/md"
-import "./app.css"
+import "./App.css"
 
 export default function Home() {
   const [imageSource, setImageSource] = useState(null)
