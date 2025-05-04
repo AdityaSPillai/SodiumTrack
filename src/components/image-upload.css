@@ -1,0 +1,100 @@
+.image-upload {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.image-upload h2 {
+  color: var(--primary-color);
+  margin-top: 0;
+  border-bottom: 2px solid var(--secondary-color);
+  padding-bottom: 10px;
+}
+
+.upload-area {
+  border: 2px dashed var(--border-color);
+  border-radius: 5px;
+  padding: 30px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.upload-area.active {
+  border-color: var(--secondary-color);
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+.upload-area.has-preview {
+  padding: 15px;
+}
+
+.upload-icon {
+  color: var(--secondary-color);
+  margin-bottom: 15px;
+}
+
+.upload-area p {
+  margin: 0 0 15px 0;
+  color: #7f8c8d;
+}
+
+.select-file-btn {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s;
+}
+
+.select-file-btn:hover {
+  background-color: #2980b9;
+}
+
+.file-input {
+  display: none;
+}
+
+.preview-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.change-image-btn {
+  background-color: var(--secondary-color);
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.change-image-btn:hover {
+  background-color: #2980b9;
+}
+
+.error-message {
+  color: var(--accent-color);
+  margin: 5px 0;
+}
