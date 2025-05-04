@@ -3,13 +3,14 @@
 import { useState, useEffect, useRef } from "react"
 import "./camera-feed.css"
 
-const CameraFeed = ({ onImageCapture }) => {
+const CameraFeed = ({ onImageCapture, onRgbValuesReceived }) => {
   const [espUrl, setEspUrl] = useState("")
   const [isConnected, setIsConnected] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
   const imageRef = useRef(null)
   const intervalRef = useRef(null)
+  const rgbPollingRef = useRef(null)
 
   const handleConnect = () => {
     if (!espUrl) {
@@ -21,7 +22,9 @@ const CameraFeed = ({ onImageCapture }) => {
     setError(null)
 
     // Format the URL properly
-    const formattedUrl = espUrl.startsWith("http") ? `${espUrl}/capture` : `http://${espUrl}/capture`
+    const baseUrl = espUrl.startsWith("http") ? espUrl : `http://${espUrl}`
+    const captureUrl = `${baseUrl}/capture`
+    const rgbUrl = `${baseUrl}/rgb` // New endpoint for RGB values
 
     // Test the connection by loading an image
     const testImg = new Image()
@@ -38,14 +41,24 @@ const CameraFeed = ({ onImageCapture }) => {
       intervalRef.current = setInterval(() => {
         if (imageRef.current) {
           // Add timestamp to prevent caching
-          imageRef.current.src = `${formattedUrl}?t=${new Date().getTime()}`
+          const timestamp = new Date().getTime()
+          imageRef.current.src = `${captureUrl}?t=${timestamp}`
         }
       }, 2000)
 
       // Initial image load
       if (imageRef.current) {
-        imageRef.current.src = formattedUrl
+        imageRef.current.src = captureUrl
       }
+
+      // Start polling for RGB values every 2 seconds
+      if (rgbPollingRef.current) {
+        clearInterval(rgbPollingRef.current)
+      }
+
+      rgbPollingRef.current = setInterval(() => {
+        fetchRgbValues(rgbUrl)
+      }, 2000)
     }
 
     testImg.onerror = () => {
@@ -53,11 +66,42 @@ const CameraFeed = ({ onImageCapture }) => {
       setError("Could not connect to ESP32-CAM. Please check the IP address and ensure the device is online.")
     }
 
-    testImg.src = formattedUrl
+    testImg.src = captureUrl
+  }
+
+  const fetchRgbValues = async (url) => {
+    try {
+      const response = await fetch(`${url}?t=${new Date().getTime()}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch RGB values")
+      }
+      const data = await response.json()
+      
+      // Check if the response contains the expected RGB values
+      if (data && typeof data.r === 'number' && typeof data.g === 'number' && typeof data.b === 'number') {
+        const rgbValues = {
+          r: Math.round(data.r),
+          g: Math.round(data.g),
+          b: Math.round(data.b)
+        }
+        
+        onRgbValuesReceived(rgbValues)
+      }
+    } catch (err) {
+      console.error("Error fetching RGB values:", err)
+      // Don't set error state here, as we want to continue
+      // even if RGB endpoint isn't yet implemented
+    }
   }
 
   const handleCapture = () => {
     if (imageRef.current && imageRef.current.src) {
+      // Immediately fetch RGB values when capturing an image
+      const baseUrl = espUrl.startsWith("http") ? espUrl : `http://${espUrl}`
+      const rgbUrl = `${baseUrl}/rgb`
+      fetchRgbValues(rgbUrl)
+      
+      // Still send the image for display
       onImageCapture(imageRef.current.src)
     }
   }
@@ -66,6 +110,10 @@ const CameraFeed = ({ onImageCapture }) => {
     if (intervalRef.current) {
       clearInterval(intervalRef.current)
       intervalRef.current = null
+    }
+    if (rgbPollingRef.current) {
+      clearInterval(rgbPollingRef.current)
+      rgbPollingRef.current = null
     }
     setIsConnected(false)
     if (imageRef.current) {
@@ -78,6 +126,9 @@ const CameraFeed = ({ onImageCapture }) => {
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
+      }
+      if (rgbPollingRef.current) {
+        clearInterval(rgbPollingRef.current)
       }
     }
   }, [])

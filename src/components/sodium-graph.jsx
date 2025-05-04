@@ -22,7 +22,7 @@ const SodiumGraph = ({ dataset, currentRgb, currentSodium }) => {
 
     // Draw axes
     ctx.beginPath()
-    ctx.strokeStyle = "#2c3e50"
+    ctx.strokeStyle = "white"
     ctx.lineWidth = 2
     ctx.moveTo(padding, padding)
     ctx.lineTo(padding, canvas.height - padding)
@@ -30,7 +30,7 @@ const SodiumGraph = ({ dataset, currentRgb, currentSodium }) => {
     ctx.stroke()
 
     // Draw axes labels
-    ctx.fillStyle = "#2c3e50"
+    ctx.fillStyle = "white"
     ctx.font = "12px Arial"
     ctx.textAlign = "center"
 
@@ -131,7 +131,7 @@ const SodiumGraph = ({ dataset, currentRgb, currentSodium }) => {
     const drawLegendItem = (text, color, y) => {
       ctx.fillStyle = color
       ctx.fillRect(legendX, y, 15, 15)
-      ctx.fillStyle = "#2c3e50"
+      ctx.fillStyle = "white"
       ctx.textAlign = "left"
       ctx.fillText(text, legendX + 25, y + 12)
     }

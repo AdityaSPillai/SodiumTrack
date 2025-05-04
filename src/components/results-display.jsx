@@ -1,82 +1,125 @@
+import { useState, useEffect } from "react"
 import "./results-display.css"
+import { MdWallpaper } from "react-icons/md"
+import { TbReportAnalytics } from "react-icons/tb"
+import { BsFillDropletFill } from "react-icons/bs"
 
-const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel }) => {
+const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
+  const [sodiumStatus, setSodiumStatus] = useState({
+    class: "",
+    label: ""
+  });
+
+  useEffect(() => {
+    if (sodiumLevel !== null) {
+      if (sodiumLevel <= 80) {
+        setSodiumStatus({
+          class: "safe-level",
+          label: "Safe level for consumption"
+        });
+      } else if (sodiumLevel <= 160) {
+        setSodiumStatus({
+          class: "moderate-level",
+          label: "Moderate sodium level"
+        });
+      } else {
+        setSodiumStatus({
+          class: "high-level",
+          label: "High sodium concentration"
+        });
+      }
+    }
+  }, [sodiumLevel]);
+
   // Function to create a color swatch from RGB values
   const getColorStyle = (rgb) => {
-    return {
-      backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`,
-    }
-  }
-
-  // Function to determine text color based on sodium level
-  const getSodiumLevelColor = (level) => {
-    if (level <= 80) return "safe-level"
-    if (level <= 160) return "moderate-level"
-    return "high-level"
-  }
+    return rgb ? {
+      backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
+    } : {};
+  };
 
   return (
     <div className="results-display">
       <h2>Analysis Results</h2>
 
-      <div className="results-grid">
-        <div className="result-section">
-          <h3>Test Strip Image</h3>
-          <div className="image-container">
-            <img src={imageSource || "/placeholder.svg"} alt="Analyzed test strip" className="result-image" />
+      {isLoading ? (
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Processing image...</p>
+        </div>
+      ) : (
+        <div className="results-grid">
+          <div className="result-section">
+            <h3>
+            <MdWallpaper size={30}/>
+              Test Strip Image
+            </h3>
+            <div className="image-container">
+              {imageSource ? (
+                <img src={imageSource} alt="Analyzed test strip" className="result-image" />
+              ) : (
+                <div className="no-image">No image captured</div>
+              )}
+            </div>
+          </div>
+
+          <div className="result-section">
+            <h3>
+              <TbReportAnalytics size={30}/>
+              RGB Analysis
+            </h3>
+            {rgbValues ? (
+              <div className="rgb-container">
+                <div className="color-swatch" style={getColorStyle(rgbValues)}></div>
+                <div className="rgb-values">
+                  <div className="rgb-value">
+                    <span className="label R">R:</span>
+                    <span className="value">{rgbValues.r}</span>
+                  </div>
+                  <div className="rgb-value">
+                    <span className="label G">G:</span>
+                    <span className="value">{rgbValues.g}</span>
+                  </div>
+                  <div className="rgb-value">
+                    <span className="label B">B:</span>
+                    <span className="value">{rgbValues.b}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="no-data">No RGB data available</p>
+            )}
+          </div>
+
+          <div className="result-section sodium-result">
+            <h3>
+            <BsFillDropletFill size={30}/>
+              Sodium Concentration
+            </h3>
+            {sodiumLevel !== null ? (
+              <div className="sodium-container">
+                <div className={`sodium-level ${sodiumStatus.class}`}>
+                  <span className="value">{sodiumLevel}</span>
+                  <span className="unit">mM</span>
+                </div>
+                <div className="interpretation">
+                  <p>{sodiumStatus.label}</p>
+                  <div className="range-indicator">
+                    <div className="range safe">Safe</div>
+                    <div className="range moderate">Moderate</div>
+                    <div className="range high">High</div>
+                    <div className="pointer" style={{left: `${Math.min(100, (sodiumLevel / 250) * 100)}%`}}></div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <p className="no-data">No sodium data available</p>
+            )}
           </div>
         </div>
-
-        <div className="result-section">
-          <h3>RGB Analysis</h3>
-          {rgbValues ? (
-            <div className="rgb-container">
-              <div className="color-swatch" style={getColorStyle(rgbValues)}></div>
-              <div className="rgb-values">
-                <div className="rgb-value">
-                  <span className="label">R:</span>
-                  <span className="value">{rgbValues.r}</span>
-                </div>
-                <div className="rgb-value">
-                  <span className="label">G:</span>
-                  <span className="value">{rgbValues.g}</span>
-                </div>
-                <div className="rgb-value">
-                  <span className="label">B:</span>
-                  <span className="value">{rgbValues.b}</span>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <p className="no-data">No RGB data available</p>
-          )}
-        </div>
-
-        <div className="result-section sodium-result">
-          <h3>Sodium Concentration</h3>
-          {sodiumLevel !== null ? (
-            <div className="sodium-container">
-              <div className={`sodium-level ${getSodiumLevelColor(sodiumLevel)}`}>
-                <span className="value">{sodiumLevel}</span>
-                <span className="unit">mM</span>
-              </div>
-              <div className="interpretation">
-                {sodiumLevel <= 80 ? (
-                  <p>Safe level for consumption</p>
-                ) : sodiumLevel <= 160 ? (
-                  <p>Moderate sodium level</p>
-                ) : (
-                  <p>High sodium concentration</p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <p className="no-data">No sodium data available</p>
-          )}
-        </div>
-      </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default ResultsDisplay
+export default ResultsDisplay;

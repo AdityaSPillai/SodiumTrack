@@ -1,10 +1,12 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import CameraFeed from "./components/camera-feed"
 import ImageUpload from "./components/image-upload"
 import ResultsDisplay from "./components/results-display"
 import SodiumGraph from "./components/sodium-graph"
+import { FaCamera } from "react-icons/fa"
+import { MdOutlineFileUpload } from "react-icons/md"
 import "./app.css"
 
 export default function Home() {
@@ -12,6 +14,7 @@ export default function Home() {
   const [rgbValues, setRgbValues] = useState(null)
   const [sodiumLevel, setSodiumLevel] = useState(null)
   const [activeTab, setActiveTab] = useState("camera")
+  const [isProcessing, setIsProcessing] = useState(false)
 
   // Reference dataset of RGB values to sodium concentrations
   const sodiumDataset = [
@@ -42,11 +45,29 @@ export default function Home() {
 
   const handleImageCapture = (imageSrc) => {
     setImageSource(imageSrc)
-    processImage(imageSrc)
+    // Now we don't process the image automatically
+    // as we expect direct RGB values from ESP32
+    // but we'll keep this as a fallback
+    if (!rgbValues) {
+      setIsProcessing(true)
+      processImage(imageSrc)
+    }
+  }
+
+  const handleRgbValuesReceived = (rgbData) => {
+    // Directly use RGB values from ESP32
+    setRgbValues(rgbData)
+    
+    // Find sodium concentration based on these values
+    const sodiumConcentration = findSodiumConcentration(rgbData)
+    setSodiumLevel(sodiumConcentration)
+    setIsProcessing(false)
   }
 
   const handleImageUpload = (imageSrc) => {
     setImageSource(imageSrc)
+    setIsProcessing(true)
+    // For uploaded images, we still need to process them
     processImage(imageSrc)
   }
 
@@ -70,9 +91,7 @@ export default function Home() {
       const imageData = ctx.getImageData(centerX - sampleSize / 2, centerY - sampleSize / 2, sampleSize, sampleSize)
 
       // Calculate average RGB
-      let r = 0,
-        g = 0,
-        b = 0
+      let r = 0, g = 0, b = 0
       for (let i = 0; i < imageData.data.length; i += 4) {
         r += imageData.data[i]
         g += imageData.data[i + 1]
@@ -91,6 +110,12 @@ export default function Home() {
       // Find closest match in dataset
       const sodiumConcentration = findSodiumConcentration(avgRgb)
       setSodiumLevel(sodiumConcentration)
+      setIsProcessing(false)
+    }
+
+    img.onerror = () => {
+      console.error("Error loading image")
+      setIsProcessing(false)
     }
 
     img.src = imageSrc
@@ -103,7 +128,7 @@ export default function Home() {
 
     sodiumDataset.forEach((data) => {
       const distance = Math.sqrt(
-        Math.pow(rgb.r - data.rgb.r, 2) + Math.pow(rgb.g - data.rgb.g, 2) + Math.pow(rgb.b - data.rgb.b, 2),
+        Math.pow(rgb.r - data.rgb.r, 2) + Math.pow(rgb.g - data.rgb.g, 2) + Math.pow(rgb.b - data.rgb.b, 2)
       )
 
       if (distance < minDistance) {
@@ -115,18 +140,44 @@ export default function Home() {
     return closestMatch
   }
 
+  // Detect screen size for responsive UI adjustments
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    // Initial check
+    checkMobile()
+    
+    // Set up listener for window resize
+    window.addEventListener('resize', checkMobile)
+    
+    // Clean up
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
   return (
     <main className="container">
       <header className="header">
-        <h1>Colorimetric Sodium Detection System</h1>
+        <h1>Colorimetric Sodium Detection</h1>
         <p>Using Cuc-Curcumin Nanoparticle Test Strips</p>
       </header>
 
       <div className="tabs">
-        <button className={activeTab === "camera" ? "active" : ""} onClick={() => setActiveTab("camera")}>
+        <button 
+          className={activeTab === "camera" ? "active" : ""} 
+          onClick={() => setActiveTab("camera")}
+        >
+          <FaCamera size={20}/>
           Camera Feed
         </button>
-        <button className={activeTab === "upload" ? "active" : ""} onClick={() => setActiveTab("upload")}>
+        <button 
+          className={activeTab === "upload" ? "active" : ""} 
+          onClick={() => setActiveTab("upload")}
+        >
+          <MdOutlineFileUpload size={25}/>
           Upload Image
         </button>
       </div>
@@ -134,22 +185,34 @@ export default function Home() {
       <div className="content-area">
         <div className="image-section">
           {activeTab === "camera" ? (
-            <CameraFeed onImageCapture={handleImageCapture} />
+            <CameraFeed 
+              onImageCapture={handleImageCapture}
+              onRgbValuesReceived={handleRgbValuesReceived}
+            />
           ) : (
             <ImageUpload onImageUpload={handleImageUpload} />
           )}
         </div>
 
-        {imageSource && (
+        {(imageSource || isProcessing) && (
           <div className="results-section">
-            <ResultsDisplay imageSource={imageSource} rgbValues={rgbValues} sodiumLevel={sodiumLevel} />
+            <ResultsDisplay 
+              imageSource={imageSource} 
+              rgbValues={rgbValues} 
+              sodiumLevel={sodiumLevel}
+              isLoading={isProcessing} 
+            />
           </div>
         )}
       </div>
 
       {rgbValues && sodiumLevel !== null && (
         <div className="graph-section">
-          <SodiumGraph dataset={sodiumDataset} currentRgb={rgbValues} currentSodium={sodiumLevel} />
+          <SodiumGraph 
+            dataset={sodiumDataset} 
+            currentRgb={rgbValues} 
+            currentSodium={sodiumLevel} 
+          />
         </div>
       )}
 

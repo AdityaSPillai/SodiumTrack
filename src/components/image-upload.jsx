@@ -45,6 +45,12 @@ const ImageUpload = ({ onImageUpload }) => {
       return
     }
 
+    // Check file size (limit to 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File size is too large. Please upload an image smaller than 5MB.")
+      return
+    }
+
     // Reset error
     setError(null)
 
@@ -74,7 +80,7 @@ const ImageUpload = ({ onImageUpload }) => {
       >
         {previewUrl ? (
           <div className="preview-container">
-            <img src={previewUrl || "/placeholder.svg"} alt="Uploaded test strip" className="preview-image" />
+            <img src={previewUrl} alt="Uploaded test strip" className="preview-image" />
             <button className="change-image-btn" onClick={handleButtonClick}>
               Change Image
             </button>
