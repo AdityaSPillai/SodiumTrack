@@ -162,7 +162,7 @@ export default function Home() {
     <main className="container">
       <header className="header">
         <div className="logo">
-          <img src="../src/assets/logotransparent.png" alt="Logo" className="logo-image" />
+          <img src="./assets/logotransparent.png" alt="Logo" className="logo-image" />
         </div>
         <div className="title">
           <h1 className="title-text">Colorimetric Sodium Detection</h1>
