@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react"
-import "./results-display.css"
-import { MdWallpaper } from "react-icons/md"
-import { TbReportAnalytics } from "react-icons/tb"
-import { BsFillDropletFill } from "react-icons/bs"
+import { useState, useEffect } from "react";
+import "./results-display.css";
+import { MdWallpaper } from "react-icons/md";
+import { TbReportAnalytics } from "react-icons/tb";
+import { BsFillDropletFill } from "react-icons/bs";
 
 const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
   const [sodiumStatus, setSodiumStatus] = useState({
@@ -10,7 +10,10 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
     label: ""
   });
 
+  const [isImageValid, setIsImageValid] = useState(true);
+
   useEffect(() => {
+    // Check sodium level and classify
     if (sodiumLevel !== null) {
       if (sodiumLevel <= 80) {
         setSodiumStatus({
@@ -31,7 +34,17 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
     }
   }, [sodiumLevel]);
 
-  // Function to create a color swatch from RGB values
+  useEffect(() => {
+    // Check if the image is valid based on RGB values
+    if (rgbValues) {
+      const { r, g, b } = rgbValues;
+      const isValid = (r >= 30 && r <= 220) && (g >= 30 && g <= 220) && (b >= 30 && b <= 220);
+      setIsImageValid(isValid);
+    } else {
+      setIsImageValid(true); // If no image or RGB yet, assume valid
+    }
+  }, [rgbValues]);
+
   const getColorStyle = (rgb) => {
     return rgb ? {
       backgroundColor: `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`
@@ -51,7 +64,7 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
         <div className="results-grid">
           <div className="result-section">
             <h3>
-            <MdWallpaper size={30}/>
+              <MdWallpaper size={30} />
               Test Strip Image
             </h3>
             <div className="image-container">
@@ -61,61 +74,70 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
                 <div className="no-image">No image captured</div>
               )}
             </div>
-          </div>
-
-          <div className="result-section">
-            <h3>
-              <TbReportAnalytics size={30}/>
-              RGB Analysis
-            </h3>
-            {rgbValues ? (
-              <div className="rgb-container">
-                <div className="color-swatch" style={getColorStyle(rgbValues)}></div>
-                <div className="rgb-values">
-                  <div className="rgb-value">
-                    <span className="label R">R:</span>
-                    <span className="value">{rgbValues.r}</span>
-                  </div>
-                  <div className="rgb-value">
-                    <span className="label G">G:</span>
-                    <span className="value">{rgbValues.g}</span>
-                  </div>
-                  <div className="rgb-value">
-                    <span className="label B">B:</span>
-                    <span className="value">{rgbValues.b}</span>
-                  </div>
-                </div>
+            {!isImageValid && (
+              <div className="error-message">
+                ⚠️ The uploaded image is not suitable for analysis. Please upload a clear and valid test strip image.
               </div>
-            ) : (
-              <p className="no-data">No RGB data available</p>
             )}
           </div>
 
-          <div className="result-section sodium-result">
-            <h3>
-            <BsFillDropletFill size={30}/>
-              Sodium Concentration
-            </h3>
-            {sodiumLevel !== null ? (
-              <div className="sodium-container">
-                <div className={`sodium-level ${sodiumStatus.class}`}>
-                  <span className="value">{sodiumLevel}</span>
-                  <span className="unit">mM</span>
-                </div>
-                <div className="interpretation">
-                  <p>{sodiumStatus.label}</p>
-                  <div className="range-indicator">
-                    <div className="range safe">Safe</div>
-                    <div className="range moderate">Moderate</div>
-                    <div className="range high">High</div>
-                    <div className="pointer" style={{left: `${Math.min(100, (sodiumLevel / 250) * 100)}%`}}></div>
+          {isImageValid && (
+            <>
+              <div className="result-section">
+                <h3>
+                  <TbReportAnalytics size={30} />
+                  RGB Analysis
+                </h3>
+                {rgbValues ? (
+                  <div className="rgb-container">
+                    <div className="color-swatch" style={getColorStyle(rgbValues)}></div>
+                    <div className="rgb-values">
+                      <div className="rgb-value">
+                        <span className="label R">R:</span>
+                        <span className="value">{rgbValues.r}</span>
+                      </div>
+                      <div className="rgb-value">
+                        <span className="label G">G:</span>
+                        <span className="value">{rgbValues.g}</span>
+                      </div>
+                      <div className="rgb-value">
+                        <span className="label B">B:</span>
+                        <span className="value">{rgbValues.b}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <p className="no-data">No RGB data available</p>
+                )}
               </div>
-            ) : (
-              <p className="no-data">No sodium data available</p>
-            )}
-          </div>
+
+              <div className="result-section sodium-result">
+                <h3>
+                  <BsFillDropletFill size={30} />
+                  Sodium Concentration
+                </h3>
+                {sodiumLevel !== null ? (
+                  <div className="sodium-container">
+                    <div className={`sodium-level ${sodiumStatus.class}`}>
+                      <span className="value">{sodiumLevel}</span>
+                      <span className="unit">mM</span>
+                    </div>
+                    <div className="interpretation">
+                      <p>{sodiumStatus.label}</p>
+                      <div className="range-indicator">
+                        <div className="range safe">Safe</div>
+                        <div className="range moderate">Moderate</div>
+                        <div className="range high">High</div>
+                        <div className="pointer" style={{ left: `${Math.min(100, (sodiumLevel / 250) * 100)}%` }}></div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="no-data">No sodium data available</p>
+                )}
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>
