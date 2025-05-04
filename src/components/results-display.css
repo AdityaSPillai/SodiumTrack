@@ -114,6 +114,16 @@
   font-style: italic;
 }
 
+.error-message {
+  color: #b00020;
+  background-color: #ffe6e6;
+  padding: 10px;
+  border: 1px solid #b00020;
+  border-radius: 6px;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
 .rgb-container {
   display: flex;
   align-items: center;

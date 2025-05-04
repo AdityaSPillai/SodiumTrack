@@ -12,18 +12,25 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
 
   const [isImageValid, setIsImageValid] = useState(true);
 
+  const getPointerPosition = (level) => {
+    const minLevel = 30;
+    const maxLevel = 250;
+    const clampedLevel = Math.max(minLevel, Math.min(level, maxLevel));
+    const percentage = ((clampedLevel - minLevel) / (maxLevel - minLevel)) * 100;
+    return `${percentage}%`;
+  };
+
   useEffect(() => {
-    // Check sodium level and classify
     if (sodiumLevel !== null) {
-      if (sodiumLevel <= 80) {
+      if (sodiumLevel < 135) {
         setSodiumStatus({
           class: "safe-level",
-          label: "Safe level for consumption"
+          label: "Low sodium concentration (Safe)"
         });
-      } else if (sodiumLevel <= 160) {
+      } else if (sodiumLevel >= 135 && sodiumLevel <= 145) {
         setSodiumStatus({
           class: "moderate-level",
-          label: "Moderate sodium level"
+          label: "Moderate sodium concentration"
         });
       } else {
         setSodiumStatus({
@@ -32,7 +39,7 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
         });
       }
     }
-  }, [sodiumLevel]);
+  }, [sodiumLevel]);  
 
   useEffect(() => {
     // Check if the image is valid based on RGB values
@@ -76,7 +83,7 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
             </div>
             {!isImageValid && (
               <div className="error-message">
-                ⚠️ The uploaded image is not suitable for analysis. Please upload a clear and valid test strip image.
+                The uploaded image is not suitable for analysis. Please upload a clear and valid test strip image.
               </div>
             )}
           </div>
@@ -125,10 +132,10 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
                     <div className="interpretation">
                       <p>{sodiumStatus.label}</p>
                       <div className="range-indicator">
-                        <div className="range safe">Safe</div>
-                        <div className="range moderate">Moderate</div>
-                        <div className="range high">High</div>
-                        <div className="pointer" style={{ left: `${Math.min(100, (sodiumLevel / 250) * 100)}%` }}></div>
+                      <div className="range safe">Low (30–135)</div>
+                      <div className="range moderate">Moderate (135–145)</div>
+                      <div className="range high">High (145+)</div>
+                      <div className="pointer" style={{ left: getPointerPosition(sodiumLevel) }}></div>
                       </div>
                     </div>
                   </div>
