@@ -341,3 +341,21 @@
     color: #aaa;
   }
 }
+
+/* Default: Show full label, hide short label */
+.full-label {
+  display: inline;
+}
+.short-label {
+  display: none;
+}
+
+/* On mobile: Hide full label, show short label */
+@media (max-width: 600px) {
+  .full-label {
+    display: none;
+  }
+  .short-label {
+    display: inline;
+  }
+}

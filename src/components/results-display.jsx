@@ -136,10 +136,19 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
                     <div className="interpretation">
                       <p>{sodiumStatus.label}</p>
                       <div className="range-indicator">
-                      <div className="range safe">Low (30–135)</div>
-                      <div className="range normal">Normal (135–145)</div>
-                      <div className="range high">High (145+)</div>
-                      <div className="pointer" style={{ left: getPointerPosition(sodiumLevel) }}></div>
+                        <div className="range safe">
+                          <span className="full-label">Low (30–135)</span>
+                          <span className="short-label">Low</span>
+                        </div>
+                        <div className="range normal">
+                          <span className="full-label">Normal (135–145)</span>
+                          <span className="short-label">Normal</span>
+                        </div>
+                        <div className="range high">
+                          <span className="full-label">High (145+)</span>
+                          <span className="short-label">High</span>
+                        </div>
+                        <div className="pointer" style={{ left: getPointerPosition(sodiumLevel) }}></div>
                       </div>
                     </div>
                   </div>
