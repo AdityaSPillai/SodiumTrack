@@ -29,7 +29,7 @@ const ResultsDisplay = ({ imageSource, rgbValues, sodiumLevel, isLoading }) => {
       if (sodiumLevel < 135) {
         setSodiumStatus({
           class: "safe-level",
-          label: "Low sodium concentration (Safe)"
+          label: "Low sodium concentration"
         });
       } else if (sodiumLevel >= 135 && sodiumLevel <= 145) {
         setSodiumStatus({
